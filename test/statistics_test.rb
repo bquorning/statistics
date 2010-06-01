@@ -87,6 +87,9 @@ class StatisticsTest < Test::Unit::TestCase
   def test_get_stat_with_boolean
     MockModel.expects(:calculate).with(:count, :id, { :conditions => "active = 't'"}).returns(6)
     assert_equal 6, MockModel.get_stat("Basic Count", :active => true)
+
+    MockModel.expects(:calculate).with(:count, :id, { :conditions => "active = 'f'"}).returns(6)
+    assert_equal 6, MockModel.get_stat("Basic Count", :active => false)
   end
 
   def test_basic_stat

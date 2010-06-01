@@ -67,7 +67,7 @@ module Statistics
             filter_hash = (@filter_all_on || {}).merge(scoped_options[:filter_on] || {})
 
             filters.each do |key, value|
-              if value
+              unless value.nil?
                 sql_frag = send(:sanitize_sql_for_conditions, [filter_hash[key], value])
 
                 case
