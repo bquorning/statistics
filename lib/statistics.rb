@@ -63,20 +63,23 @@ module Statistics
 
           scoped_options = Marshal.load(Marshal.dump(options))
 
-          filters.each do |key, value|
-            if value
-              sql = ((@filter_all_on || {}).merge(scoped_options[:filter_on] || {}))[key].gsub("?", "'#{value}'")
-              sql = sql.gsub("%t", "#{table_name}")
-              sql_frag = send(:sanitize_sql_for_conditions, sql)
-              case 
-                when sql_frag.nil? : nil
-                when scoped_options[:conditions].nil? : scoped_options[:conditions] = sql_frag
-                when scoped_options[:conditions].is_a?(Array) : scoped_options[:conditions][0].concat(" AND #{sql_frag}")
-                when scoped_options[:conditions].is_a?(String) : scoped_options[:conditions].concat(" AND #{sql_frag}")
+          if filters.is_a?(Hash)
+            filter_hash = (@filter_all_on || {}).merge(scoped_options[:filter_on] || {})
+
+            filters.each do |key, value|
+              if value
+                sql_frag = send(:sanitize_sql_for_conditions, [filter_hash[key], value])
+
+                case
+                  when sql_frag.nil? : nil
+                  when scoped_options[:conditions].nil? : scoped_options[:conditions] = sql_frag
+                  when scoped_options[:conditions].is_a?(Array) : scoped_options[:conditions][0].concat(" AND #{sql_frag}")
+                  when scoped_options[:conditions].is_a?(String) : scoped_options[:conditions].concat(" AND #{sql_frag}")
+                end
               end
             end
-          end if filters.is_a?(Hash)
-          
+          end
+
           base = self
           # chain named scopes
           scopes = Array(scoped_options[calculation])

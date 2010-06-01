@@ -37,6 +37,7 @@ class StatisticsTest < Test::Unit::TestCase
     end
 
     filter_all_stats_on(:user_id, "user_id = ?")
+    filter_all_stats_on(:active, "active = ?")
   end
 
   def test_basic
@@ -79,10 +80,15 @@ class StatisticsTest < Test::Unit::TestCase
     MockModel.expects(:calculate).with(:count, :id, {}).returns(3)
     assert_equal 3, MockModel.get_stat("Basic Count")    
 
-    MockModel.expects(:calculate).with(:count, :id, { :conditions => "user_id = '54321'"}).returns(4)
+    MockModel.expects(:calculate).with(:count, :id, { :conditions => "user_id = 54321"}).returns(4)
     assert_equal 4, MockModel.get_stat("Basic Count", :user_id => 54321)
   end
-  
+
+  def test_get_stat_with_boolean
+    MockModel.expects(:calculate).with(:count, :id, { :conditions => "active = 't'"}).returns(6)
+    assert_equal 6, MockModel.get_stat("Basic Count", :active => true)
+  end
+
   def test_basic_stat
     MockModel.expects(:calculate).with(:count, :id, {}).returns(3)
     assert_equal 3, MockModel.basic_count_stat({})
